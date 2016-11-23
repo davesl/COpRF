@@ -1,4 +1,10 @@
 function [B1, B2, B3, B4, B5, R_2, Gamma, Nx, FitSummary] = PRF_GridSearch(Y,Dsubn,Dsub_norm,Dsub_params,Gammas,tmatrix,res,resmx,FitModel,stimulus,xx,yy,hrf,modelfun,GammaStop)
+% [B1, B2, B3, B4, B5, R_2, Gamma, Nx, FitSummary] = PRF_GridSearch(Y,Dsubn,Dsub_norm,Dsub_params,Gammas,tmatrix,res,resmx,FitModel,stimulus,xx,yy,hrf,modelfun,GammaStop)
+% 
+% A function which will fit the pRF model using the reduced size
+% sub-dictionary (~3000 atoms). Used to provide a data driven mask in 
+% Convex_pRF_fit_parallel.m if COpRF_options.doGridSearch=true.
+
 
 % First use sub-dictionary to estimate x- and y-position
 [BB,~,R_2,Gamma,~,Nx,FitSummary] = ConvexEstimate(Y,Dsubn,Dsub_norm,Dsub_params,Gammas,FitModel,tmatrix,stimulus,xx,yy,res,resmx,hrf,modelfun,GammaStop);

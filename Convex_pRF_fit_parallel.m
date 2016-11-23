@@ -1,21 +1,74 @@
 function [results, B, G] = Convex_pRF_fit_parallel(stimulus,data,TR,COpRF_options)
-% Function to take pRF stimulus and data variables and model fit using
-% Convex optimisation algorithims which exploit sparsity.
+% [results, B, G] = Convex_pRF_fit_parallel(stimulus,data,TR,COpRF_options)
+% 
+% Function to take pRF stimulus and data variables and fit pRF model using
+% Convex optimisation algorithims.
 %
 % INPUT
 % stimulus = A cell array of stimulus matricies. Each cell should contain
-% the stimuli for given run number. Npixel x Npixel x Ntimepoints
+%   the stimuli for a given run number. Npixel x Npixel x Ntimepoints.
 % data = A cell array of data timeseries. Run order must match with
-% stimulus. Nresponses x Ntimepoints
-% TR = the repetition time in seconds. e.g. time between intervals in
-% stimulus and data.
-% COpRF_options = COpRF_options structure
+%   stimulus. Nresponses x Ntimepoints.
+% TR = the repetition time in seconds. e.g. time between time intervals in
+%   stimulus and data.
+% COpRF_options = COpRF_options structure. if [] then default options will
+%   be used.
 %
 % OUTPUT
 % results = structure of model fit results
 % B = raw model parameter estimates (stimulus refered e.g. rfsize in pixels)
 % G = the gamma sparsity regularization parameter used for the lasso fit
-
+%
+% 
+%% Results description
+% ~ The results output structure contains all of the pRF model parameter
+%   estimates. These are: polar angle (.ang), eccentricity (.ecc), pRF size
+%   (.rfsize), compressive exponent (.expt) and gain (.gain). The x- and
+%   y-positions are also saved (.xpos and .ypos).
+% ~ The polar angles are in degrees with 0 starting on the positive x-axis
+%   and rotating anti-clockwise (e.g. 90 is along positive y-axis).
+% ~ Model fitting summaries are included as: coefficient of determination
+%   (.R2), sparsity regularizer (.gamma), number of non-zero atom weights
+%   (.Nbeta), indices to fit voxels (.vxs), HRF function (.hrf).
+% ~ The results.params variable has all of the model parameter estimates
+%   and is equivalent to the B output variable. It takes the form
+%   Nresponses x Nparams. The parameter ordering is Xpos, Ypos, Sigma, 
+%   Gain, Exponent.
+% ~ All parameters are defined in stimulus space (e.g. screen pixels). To
+%   convert .ecc and .rfsize to visual angle multiply by the total visual
+%   angle covered by stimulus (diameter) divided by number of pixels across
+%   stimulus (diameter).
+% 
+%   E.g. if we have a stimulus extending to an eccentricity of 9 degrees 
+%   visual angle this covers 18 degrees across the stimulus diameter. We
+%   have a total stimulus pixel with of 100 and therefore multiply the
+%   .rfsize and .ecc values by C=18/100.
+%
+%% Notes and suggestions
+% ~ The fitting options can be customised before calling this function. Use
+%   initCOpRF_options.m to create an options structure. See the
+%   documentation of initCOpRF_options.m for details on each option.
+% ~ There is no need to detrend the data as this will be performed
+%   automatically using polynomial regression. The same detrending will 
+%   then be applied to the dictionary.
+% ~ To save time it is reccomended to provide a vector of indices 
+%   specifiying which timeseries to fit. This could be done with an
+%   anatomical mask (for example COpRF_options.vxs=find(MASK)).
+% ~ If you set COpRF_options.doGridSearch = true; then the code will first
+%   fit the model to all timeseries specified by COpRF_options.vxs using
+%   the reduced size sub-dictionary (~3000 atoms). COpRF_options.vxs will
+%   then be updated to include only responses where explained variance
+%   R2>COpRF_options.R2threshold before running the full model fit. This
+%   method can be used to estimate a mask directly from the data but will
+%   add a significant amount of time to the model fitting proceedure.
+% ~ Rather than generating a new dictionary for every subject in a study it
+%   is possible to generate the dictionary once using
+%   Build_pRF_dictionary.m and saving the output COpRF_options as a .mat
+%   file. These saved options will contain the full dictionary definitons
+%   and will not need to be re-computed for each subject. Note: each
+%   dictionary is related to a specific stimulus configuration so if the
+%   stimuli changes between subjects a new dictionary should be computed
+%   each time.
 
 %% Setup
 % Transpose data if required
@@ -267,13 +320,13 @@ results.Nbeta = nan([prod(datasize) 1]);
 % Save model fit results in results structure
 results.ang(vxs,:) = mod(atan2((1+res(1))/2 - Bvx(:,1), Bvx(:,2) - (1+res(2))/2),2*pi)/pi*180;
 results.ecc(vxs,:) = sqrt(((1+res(1))/2 - Bvx(:,1)).^2 + (Bvx(:,2) - (1+res(2))/2).^2);
-results.expt(vxs,:) = posrect(Bvx(:,5));
-results.rfsize(vxs,:) = abs(Bvx(:,3)) ./ sqrt(posrect(Bvx(:,5)));
+results.expt(vxs,:) = Bvx(:,5);
+results.rfsize(vxs,:) = abs(Bvx(:,3)) ./ sqrt(Bvx(:,5));
 results.R2(vxs,:) = R2vx;
 results.Gamma(vxs,:) = Gvx;
 results.gain(vxs,:) = Bvx(:,4);
-results.xpos(vxs,:) = (1+res(1))/2 - Bvx(:,1);
-results.ypos(vxs,:) = (1+res(2))/2 - Bvx(:,2);
+results.xpos(vxs,:) = Bvx(:,1) - (1+res(1))/2;
+results.ypos(vxs,:) = Bvx(:,2) - (1+res(2))/2;
 results.Nbeta(vxs,:) = Nbetavx;
 
 results.ang = reshape(results.ang, [datasize 1]);

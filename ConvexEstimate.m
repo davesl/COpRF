@@ -1,4 +1,6 @@
 function [B,Y2,R2,Gamma,DInds,Nx,FitSummary]=ConvexEstimate(Y,Dn,Dnorm,Dparams,Gammas,FitModel,tmatrix,stimulus,xx,yy,res,resmx,hrf,modelfun,GammaStop)
+% [B,Y2,R2,Gamma,DInds,Nx,FitSummary]=ConvexEstimate(Y,Dn,Dnorm,Dparams,Gammas,FitModel,tmatrix,stimulus,xx,yy,res,resmx,hrf,modelfun,GammaStop)
+% 
 % Takes a set of pRF input variables and estimates a convex model fit using
 % the LASSO algorithm.
 % Once atoms are selected at a given Gamma value the LASSO is run again

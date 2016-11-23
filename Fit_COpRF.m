@@ -1,4 +1,12 @@
 function [B1, B2, B3, B4, B5, R_2, Gamma, Nx, FitSummary] = Fit_COpRF(Y,Dn,D_norm,Dparams,Dsubn,Dsub_norm,Dsub_params,Gammas,tmatrix,Xpos,Ypos,res,resmx,R,FitModel,stimulus,xx,yy,hrf,modelfun,GammaStop)
+% [B1, B2, B3, B4, B5, R_2, Gamma, Nx, FitSummary] = Fit_COpRF(Y,Dn,D_norm,Dparams,Dsubn,Dsub_norm,Dsub_params,Gammas,tmatrix,Xpos,Ypos,res,resmx,R,FitModel,stimulus,xx,yy,hrf,modelfun,GammaStop)
+% 
+% A wrapper for the main CO-pRF fitting proceedures.
+% 1) The reduced size sub-dictionary estimates model parameters.
+% 2) Estimated xpos and ypos values are used to select only atoms contained 
+%    in the full ditionary within a distance R from estimated position.
+% 3) The selected full size dictionary atoms are used to fit model
+%    parameters.
 
 % First use sub-dictionary to estimate x- and y-position
 Bsub = ConvexEstimate(Y,Dsubn,Dsub_norm,Dsub_params,Gammas,FitModel,tmatrix,stimulus,xx,yy,res,resmx,hrf,modelfun,GammaStop);
