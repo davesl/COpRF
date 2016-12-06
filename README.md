@@ -35,7 +35,7 @@ To see the basic setup and running of the toolbox on synthetic data you can try 
 All required functions to run COpRF are included within the COpRF toolbox package. Here we make reference to the external packages used within the release.
 
 ### knkutils
-We make use of the MATLAB utilities developed by Kendrick Kay in his knkutils matlab package. The included functions provide complement the builtin matlab fuctions. The package also provides tools for designing and running visual pRF fMRI experiments.
+We make use of the MATLAB utilities developed by Kendrick Kay in his knkutils matlab package. The included functions complement the builtin matlab fuctions. The package also provides tools for designing and running visual pRF fMRI experiments.
 
 > Code and utilities: https://github.com/kendrickkay/knkutils  
 > Additional information: http://cvnlab.net/analyzePRF/
